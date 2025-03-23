@@ -347,11 +347,11 @@ class T0_test_add_and_getRecords(unittest.TestCase):
 
     def test_add_record(self):
         print("Testing add and getRecords with one record")
-        database = main.Database("test0Data")
+        database = Database("test0Data")
         database.clean()
-        record = main.Record(
+        record = Record(
             {"name": "John Doe", "address": "123 Street street", "phone number": "555-5555"})
-        database.add(record)
+        database.add(record, 'csv')
         recordCheck = database.getRecords()[0]
         self.assertEqual(record, recordCheck)
         database.clean()
@@ -359,13 +359,13 @@ class T0_test_add_and_getRecords(unittest.TestCase):
 
     def test_import(self):
         print("Testing import with no datafile or records")
-        database1 = main.Database("test3Data")
+        database1 = Database("test3Data")
         database1.clean()
-        database2 = main.Database("test3Data2")
+        database2 = Database("test3Data2")
         database2.clean()
-        record = main.Record(
+        record = Record(
             {"name": "John Doe", "address": "123 Street street", "phone number": "555-5555"})
-        database2.add(record)
+        database2.add(record, 'csv')
         database1.importRecords(database2.dataFile)
         recordCheck = database1.getRecords()[0]
         self.assertEqual(record, recordCheck)
