@@ -202,13 +202,28 @@ class Database():
 
 #  Command line interface
 class Interface():
-    def __init__(self, dataName: str):
+    def __init__(self):
         self.continuePrompt = True
-        self.database = Database(dataName)
+        self.fileName = None
+        self.fileType = None
+
+    def createDatabase(self):
+        self.database = Database(self.fileName, self.dataType)
+
+    def startingPrompt(self):
+        """ Specify target file and file type for the interface"""
+        print("Welcome! Please specify the file name:")
+        self.fileName = input("> ")
+
+        print("Please specify the file type (currently supported formats: csv and json):")
+        self.fileType = input("> ")
+
+        self.database = Database(self.fileName, self.fileType)
+        print("Database Initialized.")
 
     def prompt(self):
         """ Main driver of the command line interface """
-        print("Welcome! Please enter a command, type 'help' for list of commands:")
+        print("Please enter a command, type 'help' for list of commands:")
         while (self.continuePrompt):
             value = input("> ")
             self.__processCommand(value)
@@ -371,7 +386,8 @@ class T0_test_add_and_getRecords(unittest.TestCase):
 #  Program driver
 def main():
     """ Creates and launches the command line interface """
-    interface = Interface("data")
+    interface = Interface()
+    interface.startingPrompt()
     interface.prompt()
     return
 
