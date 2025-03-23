@@ -114,24 +114,22 @@ class JSONFormat(Format):
 
 
 class Database():
-    def __init__(self, fileName):
+    def __init__(self, fileName, fileFormat):
         self.formats = self.__configFormats()
-        self.currentFormat = "csv"
+        self.currentFormat = fileFormat
         self.fileName = fileName
-        for format in self.formats.values():
-            if os.path.isfile(f"{fileName}.{format.getName()}"):
-                self.currentFormat = format.getName()
-                break
+        if self.currentFormat not in self.formats.keys():
+            print ('ERROR: file format {} is not supported'.format(self.currentFormat))
         self.dataFile = f"{fileName}.{self.currentFormat}"
 
-    def add(self, newRecord: Record, format: str = "") -> bool:
+    def add(self, newRecord: Record) -> bool:
         """
         adds a record to a database data file,
         using the 'type', a specified format
 
         Returns success status
         """
-        return self.formats[format].write(newRecord, f"{self.fileName}.{format}")
+        return self.formats[self.currentFormat].write(newRecord, f"{self.dataFile}")
 
     def importRecords(self, fName: str) -> bool:
         """
@@ -345,32 +343,28 @@ class Interface():
 #  Unit tests
 class T0_test_add_and_getRecords(unittest.TestCase):
 
-    def test_add_record(self):
-        print("Testing add and getRecords with one record")
-        database = Database("test0Data")
+    def test_add_record_csv(self):
+        print("\nTesting add and getRecords with one record.  csv file")
+        database = Database("test0Data", 'csv')
         database.clean()
         record = Record(
             {"name": "John Doe", "address": "123 Street street", "phone number": "555-5555"})
-        database.add(record, 'csv')
+        database.add(record)
         recordCheck = database.getRecords()[0]
         self.assertEqual(record, recordCheck)
         database.clean()
         print("OK\n")
 
-    def test_import(self):
-        print("Testing import with no datafile or records")
-        database1 = Database("test3Data")
-        database1.clean()
-        database2 = Database("test3Data2")
-        database2.clean()
+    def test_add_record_json(self):
+        print("\nTesting add and getRecords with one record. json file")
+        database = Database("test0Data", 'json')
+        database.clean()
         record = Record(
             {"name": "John Doe", "address": "123 Street street", "phone number": "555-5555"})
-        database2.add(record, 'csv')
-        database1.importRecords(database2.dataFile)
-        recordCheck = database1.getRecords()[0]
+        database.add(record)
+        recordCheck = database.getRecords()[0]
         self.assertEqual(record, recordCheck)
-        database1.clean()
-        database2.clean()
+        database.clean()
         print("OK\n")
 
 
