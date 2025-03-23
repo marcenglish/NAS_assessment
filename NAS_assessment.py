@@ -1,7 +1,7 @@
 import csv, json, os, re
 from typing import Iterable
 import unittest
-
+import fnmatch
 
 #  Database
 class Record(dict):
@@ -199,6 +199,18 @@ class Database():
         if os.path.isfile(self.dataFile):
             os.remove(self.dataFile)
 
+    def filter(self, valueSelected, searchItem):
+        """ Filter the database using Glob syntax"""
+        filterResults = []
+        for entry in self.getRecords():
+            if fnmatch.fnmatch(entry[valueSelected], searchItem):
+                filterResults.append(entry)
+            elif ',' in searchItem:
+                for subItem in searchItem:
+                    if entry[valueSelected] == subItem:
+                        filterResults.append(entry)
+
+        return filterResults
 
 #  Command line interface
 class Interface():
@@ -381,6 +393,27 @@ class T0_test_add_and_getRecords(unittest.TestCase):
         self.assertEqual(record, recordCheck)
         database.clean()
         print("OK\n")
+
+    def test_filter_user(self):
+        print("\nTesting filter user")
+        database = Database("testFilter", 'csv')
+        database.clean()
+        record = Record(
+            {"name": "John Doe", "address": "123 Street street", "phone number": "555-5555"})
+        database.add(record)
+        record = Record(
+            {"name": "George Carlin", "address": "123 Street street", "phone number": "555-5555"})
+        database.add(record)
+        result = (database.filter('name', 'George*'))
+        database.clean()
+
+        if result == [{
+            'name': 'George Carlin',
+            'address': '123 Street street',
+            'phone number': '555-5555'}]:
+            print ("OK\n")
+        else:
+            raise AssertionError
 
 
 #  Program driver
