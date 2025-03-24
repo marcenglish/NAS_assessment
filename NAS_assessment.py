@@ -112,6 +112,44 @@ class JSONFormat(Format):
                 return records
         return []
 
+class Display:
+    """
+    Container class to organize display methods
+    """
+    @staticmethod
+    def displayHtml(data):
+        """
+        Create an html file of the provided data.
+
+        TODO: add an option for the user to launch a subprocess to open the data in the browser
+
+        """
+        with open(f"html_display.html", 'w') as f:
+            for record in data:
+                f.write("<ul>")
+                for key, value in record.items():
+                    f.write(f"<li>{key}: {value}</li>")
+                f.write("</ul><hr>")
+        print("html file created!")
+
+    @staticmethod
+    def displayText(data):
+        """
+        Create an text file of the provided data.
+
+        TODO: add an option for the user to launch a subprocess to open the data in a text editor
+
+        """
+        with open(f"text_display.txt", 'w') as f:
+            starCount = 30
+            f.write("*" * starCount)
+            for record in data:
+                f.write("\n")
+                for key, value in record.items():
+                    f.write(f"{key}: {value}\n")
+                f.write("\n")
+            f.write("end of records" + ("*" * (starCount - 14)))
+        print("text file created!")
 
 class Database():
     def __init__(self, fileName, fileFormat):
@@ -287,20 +325,17 @@ class Interface():
             self.__listFormats()
 
         elif command == "display":
-            format = input(f"Format? Options: text, html\n>> ").strip().lower()
-            if format == "text":
+            displayFormat = input(f"Format? Options: console, text, html\n>> ").strip().lower()
+            self.database.formats[self.database.currentFormat].getRecords(self.fileName)
+            if displayFormat == 'console':
                 self.__prettyPrint(self.database)
-            elif format == "html":
-                # Create an html file
-                with open(f"html_display.html", 'w') as f:
-                    for record in self.database:
-                        f.write("<ul>")
-                        for key, value in record.items():
-                            f.write(f"<li>{key}: {value}</li>")
-                        f.write("</ul><hr>")
-                print("html file created!")
+            elif displayFormat == 'text':
+                Display.displayText(self.database)
+            elif displayFormat == 'html':
+                Display.displayHtml(self.database)
             else:
-                print(f"{format} is not available at this time")
+                print ('{} display mode not available'.format(displayFormat))
+
 
         elif command == "convert":
             print("Choose new format")
@@ -411,6 +446,44 @@ class T0_test_add_and_getRecords(unittest.TestCase):
             print ("OK\n")
         else:
             raise AssertionError
+
+    def test_display_text(self):
+        """
+        Tests the display function
+        TODO: test only checks for display file.  Add logic to verify contents.
+        """
+        print("\nTesting display text")
+        database = Database("testDisplayText", 'csv')
+        database.clean()
+        record = Record(
+            {"name": "Homer", "address": "742 Evergreen Terrace", "phone number": "555-1212"})
+        database.add(record)
+        recordCheck = database.getRecords()
+        Display.displayText(recordCheck)
+        if not os.path.isfile('text_display.txt'):
+            raise AssertionError
+        database.clean()
+        os.remove('text_display.txt')
+        print("OK\n")
+
+    def test_display_html(self):
+        """
+        Tests the display function
+        TODO: test only checks for display file.  Add logic to verify contents.
+        """
+        print("\nTesting display html")
+        database = Database("testDisplayHtml", 'csv')
+        database.clean()
+        record = Record(
+            {"name": "Homer", "address": "742 Evergreen Terrace", "phone number": "555-1212"})
+        database.add(record)
+        recordCheck = database.getRecords()
+        Display.displayHtml(recordCheck)
+        if not os.path.isfile('html_display.html'):
+            raise AssertionError
+        database.clean()
+        os.remove('html_display.html')
+        print("OK\n")
 
 
 #  Program driver
