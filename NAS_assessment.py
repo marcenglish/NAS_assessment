@@ -38,13 +38,17 @@ class Format():
         return []
 
     @staticmethod
-    def configFormats() -> dict:
+    def __configFormats() -> dict:
         """	New storage formats get added here.	"""
         formats = {}
         formats['csv'] = CSVFormat()
         formats['json'] = JSONFormat()
         return formats
 
+    @staticmethod
+    def getFormats() -> dict:
+        """ returns a tuple containing (dict of formats, current format) """
+        return Format.__configFormats()
 
 class CSVFormat(Format):
     def __init__(self):
