@@ -18,7 +18,7 @@ class Record(dict):
 
 
 class Format():
-    """ Abstract base class for Format creation """
+    """ Abstract base class for Format handling """
 
     def __init__(self, name):
         self.name = name
@@ -36,6 +36,14 @@ class Format():
     def getRecords(self, fName: str) -> list:
         raise NotImplementedError
         return []
+
+    @staticmethod
+    def configFormats() -> dict:
+        """	New storage formats get added here.	"""
+        formats = {}
+        formats['csv'] = CSVFormat()
+        formats['json'] = JSONFormat()
+        return formats
 
 
 class CSVFormat(Format):
@@ -153,7 +161,7 @@ class Display:
 
 class Database():
     def __init__(self, fileName, fileFormat):
-        self.formats = self.__configFormats()
+        self.formats = Format.configFormats()
         self.currentFormat = fileFormat
         self.fileName = fileName
         if self.currentFormat not in self.formats.keys():
@@ -216,21 +224,14 @@ class Database():
         """ returns a list containing all stored records"""
         return self.formats[self.currentFormat].getRecords(self.dataFile)
 
-    def getFormats(self) -> tuple:
+    def getCurrentFormat(self) -> tuple:
         """ returns a tuple containing (dict of formats, current format) """
-        return (self.formats, self.currentFormat)
+        return self.currentFormat
 
     def __iter__(self):
         """ Determines how a database gets iterated over """
         for record in self.formats[self.currentFormat].getRecords(self.dataFile):
             yield record
-
-    def __configFormats(self) -> dict:
-        """	New storage formats get added here.	"""
-        formats = {}
-        formats['csv'] = CSVFormat()
-        formats['json'] = JSONFormat()
-        return formats
 
     def clean(self):
         """ Deletes the current data file"""
@@ -370,11 +371,10 @@ class Interface():
     def __listFormats(self):
         """ Helper function for when all available formats need to be printed for the user to see
         """
-        formatTypes, currentFormat = self.database.getFormats()
-        print(f"Current: {currentFormat}")
+        print(f"Current: {self.database.getCurrentFormat()}")
         print("Available:", end=" ")
-        for format in formatTypes:
-            print(format, end=" ")
+        for availableFormats in Format.configFormats().keys():
+            print(availableFormats, end=" ")
         print()
 
     def __listCommands(self):
