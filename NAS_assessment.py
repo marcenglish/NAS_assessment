@@ -219,9 +219,6 @@ class Interface():
         self.fileName = None
         self.fileType = None
 
-    def createDatabase(self):
-        self.database = Database(self.fileName, self.dataType)
-
     def startingPrompt(self):
         """ Specify target file and file type for the interface"""
         print("Welcome! Please specify the file name:")
