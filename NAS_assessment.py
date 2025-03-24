@@ -165,7 +165,7 @@ class Display:
 
 class Database():
     def __init__(self, fileName, fileFormat):
-        self.formats = Format.configFormats()
+        self.formats = Format.getFormats()
         self.currentFormat = fileFormat
         self.fileName = fileName
         if self.currentFormat not in self.formats.keys():
@@ -208,13 +208,14 @@ class Database():
             self.currentFormat = newFormat
             return True
         if newFormat in self.formats.keys():
-            records = self.formats[self.currentFormat].getRecords(self.dataFile)
+            originalRecords = self.formats[self.currentFormat].getRecords(self.dataFile)
             newFile = f"{self.fileName}.{newFormat}"
+            newDatabase = Database(self.fileName, newFormat)
             if os.path.isfile(newFile):
                 os.remove(newFile)
-            for record in records:
-                self.add(record, newFormat)
-            if self.formats[newFormat].getRecords(newFile) == records:
+            for record in originalRecords:
+                newDatabase.add(record)
+            if self.formats[newFormat].getRecords(newFile) == originalRecords:
                 os.remove(self.dataFile)
                 self.currentFormat = newFormat
                 self.dataFile = newFile
@@ -346,7 +347,7 @@ class Interface():
             print("Choose new format")
             self.__listFormats()
             newFormat = input(f">> ").strip().lower()
-            if newFormat in self.database.getFormats()[0].keys():
+            if newFormat in Format.getFormats().keys():
                 if self.database.convert(newFormat):
                     print(f"Database has been converted to {newFormat}!")
                 else:
@@ -377,7 +378,7 @@ class Interface():
         """
         print(f"Current: {self.database.getCurrentFormat()}")
         print("Available:", end=" ")
-        for availableFormats in Format.configFormats().keys():
+        for availableFormats in Format.getFormats().keys():
             print(availableFormats, end=" ")
         print()
 
